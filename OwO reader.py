@@ -26,21 +26,8 @@ def create_embed(instance, page_param=None):
     embed.set_image(url=instance.book.get_image_link(page))
     return embed
 
-async def load_empty(instance, page=None):
-    channel = client.get_channel(689612977279860789)
-    await channel.send(embed=create_embed(instance, page))
-
-
-async def load_empty_range(instance, up, down):
-
-    for i in range(instance.page - down, instance.page + up + 1):
-        if i < 0:
-            i = instance.book.page_count + i + 1
-        if i > instance.book.page_count:
-            i = 0
-
-        await load_empty(instance, i)
-
+def update_message(msg, instance):
+    msg.edit(embed=create_embed(instance))
 
 @client.event
 async def on_raw_reaction_add(payload):
@@ -60,19 +47,25 @@ async def on_raw_reaction_add(payload):
             if instance.page > instance.book.page_count:
                 instance.page = 0
 
-            print(instance.page)
-
         elif payload.emoji.id == 688534637076545536:
             instance.page -= 1
             if instance.page < 0:
                 instance.page = instance.book.page_count
 
-            print(instance.page)
-
+        print(instance.page)
+        
         channel = client.get_channel(payload.channel_id)
         msg = await channel.fetch_message(payload.message_id)
 
-        await msg.edit(embed=create_embed(instance))
+        reacts = msg.reactions
+        for i in reacts:
+                users = await i.users().flatten()
+                for user in users:
+                    if user != client.user:
+                        await i.remove(user)
+        
+        update_message(msg, instance)
+        
         #content= "Page " + str(instance.page),
 
         """future_load = instance.page + 2
@@ -108,11 +101,10 @@ async def on_message(message):
             await msg.add_reaction(emoji="<:left:688534637076545536>")
             await msg.add_reaction(emoji="<:right:688534772078608384>")
 
-            #await load_empty_range(instance, 3, 3)
-
     elif message.author.id == 217704901889884160 and message.content.startswith('!clear'):
-        pass
-        #await message.channel.purge(limit=100)
+        await message.channel.purge(limit=100)
+
+    
 
 
 @client.event
