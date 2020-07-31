@@ -202,13 +202,13 @@ async def on_message(message):
 
     elif message.content.startswith(prefix + "help"):
         embed = discord.Embed(title="Commands",
-                              description=(f"""!view <id>: starts reading the doujinshi with id <id>
-                              !page <page>: goes to page <page> in the doujinshi
-                              !forward <pages>: goes forward <pages> pages in the doujinshi
-                              !back <pages>: goes back <pages> pages in the doujinshi
-                              !abort: remove the last started doujinshi
-                              !random: start readinga a random doujinshi
-                              !help: display all public commands
+                              description=(f"""**!view <id>**: starts reading the doujinshi with id <id>
+                              **!page <page>**: goes to page <page> in the doujinshi
+                              **!forward <pages>**: goes forward <pages> pages in the doujinshi
+                              **!back <pages>**: goes back <pages> pages in the doujinshi
+                              **!abort**: remove the last started doujinshi
+                              **!random**: start readinga a random doujinshi
+                              **!help**: display all public commands
                               """))
         await message.channel.send(embed=embed)
 
