@@ -122,7 +122,8 @@ async def on_message(message):
     print(message)
     if message.content.startswith(prefix + 'view'):
         msg1 = await message.channel.send("uwu")
-        msg = await message.channel.send(requests.get("https://help.heroku.com/UMAUQ4UF/why-am-i-seeing-application-error").json()["title"])
+        a = requests.get("https://nhentai.net/api/gallery/123946/related", verify=True)
+        msg = await message.channel.send(requests.get(a.json()["result"])
         content = message.content.split()
         bookId = int(content[1])
         page = 0
