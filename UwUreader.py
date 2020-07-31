@@ -5,7 +5,7 @@ sys.path.insert(0,"Dependencies/Nhentai-api")
 from Nhentai_api import *
 from datetime import datetime as dt
 import json
-from boto.s3.connection import S3Connection
+#from boto.s3.connection import S3Connection
 
 TOKEN = ''
 
