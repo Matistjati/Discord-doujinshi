@@ -5,10 +5,18 @@ sys.path.insert(0,"Dependencies/Nhentai-api")
 from Nhentai_api import *
 from datetime import datetime as dt
 import json
+from boto.s3.connection import S3Connection
 
 TOKEN = ''
-with open('credentials.json') as f:
-    TOKEN = json.load(f)["token"]
+
+on_heroku = False
+if 'token' in os.environ:
+  on_heroku = True
+  TOKEN = os.environ['token']
+  
+else:
+    with open('credentials.json') as f:
+        TOKEN = json.load(f)["token"]
 
 
 client = discord.Client()
