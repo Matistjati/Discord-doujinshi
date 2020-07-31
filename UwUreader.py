@@ -5,7 +5,6 @@ sys.path.insert(0,"Dependencies/Nhentai-api")
 from Nhentai_api import *
 from datetime import datetime as dt
 import json
-#from boto.s3.connection import S3Connection
 
 TOKEN = ''
 
@@ -47,7 +46,7 @@ class BookInstance:
     @staticmethod
     def get_latest_book_in_channel(channel_id):
         books_in_channel = []
-        for bookId, book in books.items():
+        for book_id, book in books.items():
             if book.message.channel.id == channel_id:
                 books_in_channel.append(book)
 
@@ -91,8 +90,6 @@ async def on_raw_reaction_add(payload):
             if instance.page < 0:
                 instance.page = instance.book.page_count
 
-        print(instance.page)
-
         channel = client.get_channel(payload.channel_id)
         msg = await channel.fetch_message(payload.message_id)
 
@@ -119,23 +116,19 @@ async def on_message(message):
     if message.author.id == client.user.id:
         return
 
-    print(message)
+    #print(message)
     if message.content.startswith(prefix + 'view'):
-        a = requests.get("https://stackoverflow.com/questions/46199183/retrieving-html-from-a-url-on-heroku")
-        msg1 = await message.channel.send(a.status_code)
-        #a = requests.get("https://nhentai.net/api/gallery/123946/related", verify=False)
-        #msg = await message.channel.send(a.json()["result"])
         content = message.content.split()
-        bookId = int(content[1])
+        book_id = int(content[1])
         page = 0
         if len(content) > 2:
             page = int(content[2])
 
-        book = Book(bookId)
+        book = Book(book_id)
         instance = BookInstance(book, message, page, dt.now())
 
         if book.bad:
-            await message.channel.send(f"There is no book with id {bookId}")
+            await message.channel.send(f"There is no book with id {book_id}")
 
         else:
             msg = await message.channel.send(embed=create_embed(instance))
