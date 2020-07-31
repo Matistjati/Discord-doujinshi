@@ -121,7 +121,7 @@ async def on_message(message):
 
     print(message)
     if message.content.startswith(prefix + 'view'):
-        a = requests.get("https://stackoverflow.com/questions/46199183/retrieving-html-from-a-url-on-heroku)
+        a = requests.get("https://stackoverflow.com/questions/46199183/retrieving-html-from-a-url-on-heroku")
         msg1 = await message.channel.send(a.status_code)
         #a = requests.get("https://nhentai.net/api/gallery/123946/related", verify=False)
         #msg = await message.channel.send(a.json()["result"])
