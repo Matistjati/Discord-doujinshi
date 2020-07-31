@@ -122,9 +122,7 @@ async def on_message(message):
     print(message)
     if message.content.startswith(prefix + 'view'):
         msg1 = await message.channel.send("hi")
-        instance.assign_msg(msg1)
         msg = await message.channel.send(requests.get("https://jsonplaceholder.typicode.com/posts/1").json()["title"])
-        instance.assign_msg(msg)
         content = message.content.split()
         bookId = int(content[1])
         page = 0
