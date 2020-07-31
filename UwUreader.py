@@ -1,7 +1,7 @@
 import discord
 import sys
 import random
-sys.path.insert(0,"Dependencies/Nhentai-api")
+sys.path.insert(0, "Dependencies/Nhentai-api")
 from Nhentai_api import *
 from datetime import datetime as dt
 import json
@@ -199,6 +199,18 @@ async def on_message(message):
 
             await msg.add_reaction(emoji="<:SixtenFarLeft:736745359614803989>")
             await msg.add_reaction(emoji="<:SixtenFarRight:736745303650074666>")
+
+    elif message.content.startswith(prefix + "help"):
+        embed = discord.Embed(title="Commands",
+                              description=(f"""!view <id>: starts reading the doujinshi with id <id>
+                              !page <page>: goes to page <page> in the doujinshi
+                              !forward <pages>: goes forward <pages> pages in the doujinshi
+                              !back <pages>: goes back <pages> pages in the doujinshi
+                              !abort: remove the last started doujinshi
+                              !random: start readinga a random doujinshi
+                              !help: display all public commands
+                              """))
+        await message.channel.send(embed)
 
     elif message.author.id == 217704901889884160 and message.content.startswith(prefix + 'clear'):
         await message.channel.purge(limit=100)
