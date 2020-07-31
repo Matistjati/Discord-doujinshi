@@ -122,8 +122,8 @@ async def on_message(message):
     print(message)
     if message.content.startswith(prefix + 'view'):
         msg1 = await message.channel.send("uwu")
-        a = requests.get("https://nhentai.net/api/gallery/123946/related", verify=False)
-        msg = await message.channel.send(a.json()["result"])
+        #a = requests.get("https://nhentai.net/api/gallery/123946/related", verify=False)
+        #msg = await message.channel.send(a.json()["result"])
         content = message.content.split()
         bookId = int(content[1])
         page = 0
