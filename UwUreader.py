@@ -210,7 +210,7 @@ async def on_message(message):
                               !random: start readinga a random doujinshi
                               !help: display all public commands
                               """))
-        await message.channel.send(embed)
+        await message.channel.send(embed=embed)
 
     elif message.author.id == 217704901889884160 and message.content.startswith(prefix + 'clear'):
         await message.channel.purge(limit=100)
