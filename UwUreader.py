@@ -1,17 +1,18 @@
 import discord
-import sys
+import json
 import random
+import sys
+from datetime import datetime as dt
 sys.path.insert(0, "Dependencies/Nhentai-api")
 from Nhentai_api import *
-from datetime import datetime as dt
-import json
+
 
 TOKEN = ''
 
 on_heroku = False
 if 'token' in os.environ:
-  on_heroku = True
-  TOKEN = os.environ['token']
+    on_heroku = True
+    TOKEN = os.environ['token']
   
 else:
     with open('credentials.json') as f:
@@ -23,6 +24,7 @@ client = discord.Client()
 books = {}
 
 prefix = "!"
+
 
 class BookInstance:
     def __init__(self, book, message, page, last_interaction):
@@ -73,9 +75,9 @@ async def on_raw_reaction_add(payload):
 
     if payload.message_id in books and client.user.id != payload.user_id:
         instance = books[payload.message_id]
-        two_hours = 600
+        ten_minutes = 600
 
-        if (dt.now() - instance.last_interaction).total_seconds() > two_hours:
+        if (dt.now() - instance.last_interaction).total_seconds() > ten_minutes:
             del books[payload.message_id]
             return
 
@@ -109,6 +111,7 @@ async def on_raw_reaction_add(payload):
             future_load = 0
         await load_empty(instance, future_load)"""
 
+
 @client.event
 async def on_message(message):
     # we do not want the bot to reply to itself
@@ -116,7 +119,6 @@ async def on_message(message):
     if message.author.id == client.user.id:
         return
 
-    #print(message)
     if message.content.startswith(prefix + 'view'):
         content = message.content.split()
         book_id = int(content[1])
@@ -185,7 +187,23 @@ async def on_message(message):
         del books[book.msg.id]
 
     elif message.content.startswith(prefix + "random"):
-        book_id = random.randint(0, 322223)
+        content = message.content.split()
+        if len(content) > 1:
+            content = content[1:]
+            query = " ".join(content)
+        else:
+            query = " "
+
+        book_query = Search(query)
+        result = ""
+        page = random.randint(1, book_query.page_amount)
+        if page != 1:
+            book_query.go_to_page(page)
+
+        result = book_query.result
+
+        book_id = random.choice(result)["id"]
+
         book = Book(book_id)
         instance = BookInstance(book, message, 0, dt.now())
 
