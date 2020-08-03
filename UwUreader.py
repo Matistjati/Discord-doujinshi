@@ -104,8 +104,6 @@ async def on_raw_reaction_add(payload):
 
         await update_message(msg, instance)
 
-        #content= "Page " + str(instance.page),
-
         """future_load = instance.page + 2
         if future_load > instance.book.page_count:
             future_load = 0
@@ -187,15 +185,53 @@ async def on_message(message):
         del books[book.msg.id]
 
     elif message.content.startswith(prefix + "random"):
-        content = message.content.split()
-        if len(content) > 1:
-            content = content[1:]
+        split_content = message.content.split()
+        if "," in message.content:
+            content = " ".join(message.content.split()[1:])
+            content = content.split(",")
+            for i in range(len(content)):
+                content[i] = content[i].strip()
+
+            query = ""
+            include = [i for i in content if not i.startswith("-")]
+            exclude = [i for i in content if i.startswith("-")]
+            if len(include) > 0:
+                query += "tag:"
+                for i in include:
+                    query += f"\"{i}\" "
+
+            if len(exclude) > 0:
+                query += " -tag:"
+                for i in exclude:
+                    query += f"\"{i[1:]}\" "
+
+        elif len(split_content) > 1:
+            content = split_content[1:]
+
             query = " ".join(content)
         else:
             query = " "
 
         book_query = Search(query)
-        result = ""
+
+        if len(book_query.result) == 0:
+            hen_ties = ["https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
+                        "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
+                        ]
+            embed = discord.Embed(title="Nobody here but us chickens!")
+            embed.set_image(url=random.choice(hen_ties))
+            await message.channel.send(embed=embed)
+            return
+
         page = random.randint(1, book_query.page_amount)
         if page != 1:
             book_query.go_to_page(page)
@@ -220,20 +256,23 @@ async def on_message(message):
 
     elif message.content.startswith(prefix + "help"):
         embed = discord.Embed(title="Commands",
-                              description=(f"""**!view <id>**: starts reading the doujinshi with id <id>
-                              **!page <page>**: goes to page <page> in the doujinshi
-                              **!forward <pages>**: goes forward <pages> pages in the doujinshi
-                              **!back <pages>**: goes back <pages> pages in the doujinshi
+                              description=(f"""**!view <id>**: starts reading a doujinshi
+                              **!page <page>**: goes to a page in the doujinshi
+                              **!forward <pages>**: goes forward some pages in the doujinshi
+                              **!back <pages>**: goes back some pages in the doujinshi
                               **!abort**: remove the last started doujinshi
                               **!random**: start readinga a random doujinshi
-                              **!help**: display all public commands
+                              **!random <search>**: Read a random doujinshi from a search result
+                              **!random <tags>**: Display a random doujinshi with certain tags. Comma separate them, and start off with - to exclude. Example: !random yuri, kantai collection, -netorare
                               """))
         await message.channel.send(embed=embed)
 
     elif message.author.id == 217704901889884160 and message.content.startswith(prefix + 'clear'):
-        await message.channel.purge(limit=100)
-
-
+        content = message.content.split(" ")
+        limit = 100
+        if len(content) > 1:
+            limit = int(content[1])
+        await message.channel.purge(limit=limit)
 
 
 @client.event
