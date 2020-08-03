@@ -25,24 +25,28 @@ books = {}
 
 prefix = "!"
 
-hen_ties = ["https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
-            "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
-            ]
+hen_ties = random.shuffle(
+    [
+        "https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
+        "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
+    ])
 
 hen_tie_index = 0
+
 
 class BookInstance:
     def __init__(self, book, message, page, last_interaction):
         self.book = book
+        self.page_count = book.page_count
         self.message = message
         self.page = page
         self.last_interaction = last_interaction
@@ -87,41 +91,45 @@ async def update_message(msg, instance):
 async def on_raw_reaction_add(payload):
     global books
 
-    if payload.message_id in books and client.user.id != payload.user_id:
-        instance = books[payload.message_id]
-        ten_minutes = 600
+    if client.user.id == payload.user_id:
+        return
 
-        if (dt.now() - instance.last_interaction).total_seconds() > ten_minutes:
-            del books[payload.message_id]
-            return
+    channel = client.get_channel(payload.channel_id)
+    msg = await channel.fetch_message(payload.message_id)
 
-        instance.last_interaction = dt.now()
-        if payload.emoji.id == 736745303650074666:
-            instance.page += 1
-            if instance.page > instance.book.page_count:
-                instance.page = 0
+    ten_minutes = 600
 
-        elif payload.emoji.id == 736745359614803989:
-            instance.page -= 1
-            if instance.page < 0:
-                instance.page = instance.book.page_count
+    if (dt.utcnow() - msg.created_at).total_seconds() < ten_minutes:
+        if payload.emoji == discord.PartialEmoji(name="❌"):
+            await msg.delete()
+        elif payload.message_id in books and (payload.emoji.id == 736745303650074666 or payload.emoji.id == 736745359614803989):
+            instance = books[payload.message_id]
 
-        channel = client.get_channel(payload.channel_id)
-        msg = await channel.fetch_message(payload.message_id)
+            instance.last_interaction = dt.now()
+            if payload.emoji.id == 736745303650074666:
+                instance.page += 1
+                if instance.page > instance.book.page_count:
+                    instance.page = 0
 
-        reacts = msg.reactions
-        for i in reacts:
-            users = await i.users().flatten()
-            for user in users:
-                if user != client.user:
-                    await i.remove(user)
+            elif payload.emoji.id == 736745359614803989:
+                instance.page -= 1
+                if instance.page < 0:
+                    instance.page = instance.book.page_count
 
-        await update_message(msg, instance)
 
-        """future_load = instance.page + 2
-        if future_load > instance.book.page_count:
-            future_load = 0
-        await load_empty(instance, future_load)"""
+            reacts = msg.reactions
+            for i in reacts:
+                users = await i.users().flatten()
+                for user in users:
+                    if user != client.user:
+                        await i.remove(user)
+
+            await update_message(msg, instance)
+
+            """future_load = instance.page + 2
+            if future_load > instance.book.page_count:
+                future_load = 0
+            await load_empty(instance, future_load)"""
 
 
 @client.event
@@ -151,6 +159,7 @@ async def on_message(message):
 
             await msg.add_reaction(emoji="<:SixtenFarLeft:736745359614803989>")
             await msg.add_reaction(emoji="<:SixtenFarRight:736745303650074666>")
+            await msg.add_reaction(emoji="❌")
 
     elif message.content.startswith(prefix + "page"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
@@ -191,6 +200,16 @@ async def on_message(message):
             page_delta = book.page
 
         await book.update_book(book.page - page_delta)
+
+    elif message.content.startswith(prefix + "beginning"):
+        book = BookInstance.get_latest_book_in_channel(message.channel.id)
+
+        await book.update_book(0)
+
+    elif message.content.startswith(prefix + "end"):
+        book = BookInstance.get_latest_book_in_channel(message.channel.id)
+
+        await book.update_book(book.page_count)
 
     elif message.content.startswith(prefix + "abort"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
@@ -234,7 +253,7 @@ async def on_message(message):
             embed = discord.Embed(title="Nobody here but us chickens!")
             embed.set_image(url=hen_ties[hen_tie_index])
             hen_tie_index += 1
-            if hen_tie_index == len(hen_ties) - 1:
+            if hen_tie_index == len(hen_ties):
                 hen_tie_index = 0
                 random.shuffle(hen_ties)
             await message.channel.send(embed=embed)
@@ -261,13 +280,16 @@ async def on_message(message):
 
             await msg.add_reaction(emoji="<:SixtenFarLeft:736745359614803989>")
             await msg.add_reaction(emoji="<:SixtenFarRight:736745303650074666>")
+            await msg.add_reaction(emoji="❌")
 
     elif message.content.startswith(prefix + "help"):
         embed = discord.Embed(title="Commands",
-                              description=(f"""**!view <id>**: starts reading a doujinshi
-                              **!page <page>**: goes to a page in the doujinshi
-                              **!forward <pages>**: goes forward some pages in the doujinshi
-                              **!back <pages>**: goes back some pages in the doujinshi
+                              description=(f"""**!view <id>**: start reading a doujinshi
+                              **!page <page>**: goes to a certain page
+                              **!forward <pages>**: goes forward some pages
+                              **!back <pages>**: goes back some pages
+                              **!beginning**: go to the first page
+                              **!end**: go to the last page
                               **!abort**: remove the last started doujinshi
                               **!random**: start readinga a random doujinshi
                               **!random <search>**: Read a random doujinshi from a search result
