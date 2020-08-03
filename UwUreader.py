@@ -25,6 +25,20 @@ books = {}
 
 prefix = "!"
 
+hen_ties = ["https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
+            ]
+
+hen_tie_index = 0
 
 class BookInstance:
     def __init__(self, book, message, page, last_interaction):
@@ -215,20 +229,14 @@ async def on_message(message):
         book_query = Search(query)
 
         if len(book_query.result) == 0:
-            hen_ties = ["https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
-                        "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
-                        ]
+            global hen_tie_index
+
             embed = discord.Embed(title="Nobody here but us chickens!")
-            embed.set_image(url=random.choice(hen_ties))
+            embed.set_image(url=hen_ties[hen_tie_index])
+            hen_tie_index += 1
+            if hen_tie_index == len(hen_ties) - 1:
+                hen_tie_index = 0
+                random.shuffle(hen_ties)
             await message.channel.send(embed=embed)
             return
 
@@ -271,7 +279,7 @@ async def on_message(message):
         content = message.content.split(" ")
         limit = 100
         if len(content) > 1:
-            limit = int(content[1])
+            limit = int(content[1]) + 1
         await message.channel.purge(limit=limit)
 
 
