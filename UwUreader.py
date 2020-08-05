@@ -77,7 +77,7 @@ class BookInstance:
 
 def create_embed(instance, page_param=None):
     page = page_param if page_param is not None else instance.page
-    embed = discord.Embed(title=instance.book.name,
+    embed = discord.Embed(title=f"{instance.book.name} ({instance.book.book_id})",
                           description=(f"Page {page}" if page != 0 else "Cover"))
     embed.set_image(url=instance.book.get_image_link(page))
     return embed
@@ -115,7 +115,6 @@ async def on_raw_reaction_add(payload):
                 instance.page -= 1
                 if instance.page < 0:
                     instance.page = instance.book.page_count
-
 
             reacts = msg.reactions
             for i in reacts:
@@ -217,6 +216,29 @@ async def on_message(message):
         await book.msg.delete()
         del books[book.msg.id]
 
+    elif message.content.startswith(prefix + "random_image"):
+        split_content = message.content.split()
+        amount = 1
+        if len(split_content) > 1:
+            amount = int(split_content[1])
+
+        query = " "
+
+        book_query = Search(query)
+        for i in range(amount):
+            page = random.randint(1, book_query.page_amount)
+            book_query.go_to_page(page)
+
+            result = book_query.result
+
+            book_id = random.choice(result)["id"]
+
+            book = Book(book_id)
+
+            instance = BookInstance(book, message, random.randint(0, book.page_count), dt.now())
+            msg = await message.channel.send(embed=create_embed(instance))
+            await msg.add_reaction(emoji="❌")
+
     elif message.content.startswith(prefix + "random"):
         split_content = message.content.split()
         if "," in message.content:
@@ -281,6 +303,7 @@ async def on_message(message):
             await msg.add_reaction(emoji="<:SixtenFarLeft:736745359614803989>")
             await msg.add_reaction(emoji="<:SixtenFarRight:736745303650074666>")
             await msg.add_reaction(emoji="❌")
+
 
     elif message.content.startswith(prefix + "help"):
         embed = discord.Embed(title="Commands",
