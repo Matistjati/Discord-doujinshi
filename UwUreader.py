@@ -77,7 +77,7 @@ class BookInstance:
 
 def create_embed(instance, page_param=None):
     page = page_param if page_param is not None else instance.page
-    embed = discord.Embed(title=f"{instance.book.name} ({instance.book.book_id})",
+    embed = discord.Embed(title=f"{instance.book.name} ({instance.book.book_id}){ ' Posted for debug' if not on_heroku else ''}",
                           description=(f"Page {page}" if page != 0 else "Cover"))
     embed.set_image(url=instance.book.get_image_link(page))
     return embed
@@ -219,10 +219,18 @@ async def on_message(message):
     elif message.content.startswith(prefix + "random_image"):
         split_content = message.content.split()
         amount = 1
-        if len(split_content) > 1:
-            amount = int(split_content[1])
-
         query = " "
+        if len(split_content) > 1:
+            if split_content[1].isdigit():
+                amount = int(split_content[1])
+
+                query = " ".join(split_content[2:])
+            else:
+                query = " ".join(split_content[1:])
+
+
+
+
 
         book_query = Search(query)
         for i in range(amount):
