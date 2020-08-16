@@ -324,6 +324,7 @@ async def on_message(message):
                               **!random**: start readinga a random doujinshi
                               **!random <search>**: Read a random doujinshi from a search result
                               **!random <tags>**: Display a random doujinshi with certain tags. Comma separate them, and start off with - to exclude. Example: !random yuri, kantai collection, -netorare
+                              **!random_image <amount> <search>**: display a certain amount of random images from random doujinshis
                               """))
         await message.channel.send(embed=embed)
 
