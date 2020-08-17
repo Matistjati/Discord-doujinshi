@@ -86,6 +86,16 @@ def create_embed(instance, page_param=None):
 async def update_message(msg, instance):
     await msg.edit(embed=create_embed(instance))
 
+def get_chicken_message():
+    embed = discord.Embed(title="Nobody here but us chickens!")
+
+    embed.set_image(url=BotInfo.hen_ties[BotInfo.hen_tie_index])
+    BotInfo.hen_tie_index += 1
+    if BotInfo.hen_tie_index == len(BotInfo.hen_ties):
+        BotInfo.hen_tie_index = 0
+        random.shuffle(BotInfo.hen_ties)
+    return embed
+
 
 @client.event
 async def on_raw_reaction_add(payload):
@@ -232,19 +242,25 @@ async def on_message(message):
 
 
         book_query = Search(query)
-        for i in range(amount):
-            page = random.randint(1, book_query.page_amount)
-            book_query.go_to_page(page)
+        if len(book_query.result) == 0:
+            chicken_message = get_chicken_message()
+            await
+            message.channel.send(embed=chicken_message)
+            return
+        else:
+            for i in range(amount):
+                page = random.randint(1, book_query.page_amount)
+                book_query.go_to_page(page)
 
-            result = book_query.result
+                result = book_query.result
 
-            book_id = random.choice(result)["id"]
+                book_id = random.choice(result)["id"]
 
-            book = Book(book_id)
+                book = Book(book_id)
 
-            instance = BookInstance(book, message, random.randint(0, book.page_count), dt.now())
-            msg = await message.channel.send(embed=create_embed(instance))
-            await msg.add_reaction(emoji="❌")
+                instance = BookInstance(book, message, random.randint(0, book.page_count), dt.now())
+                msg = await message.channel.send(embed=create_embed(instance))
+                await msg.add_reaction(emoji="❌")
 
     elif message.content.startswith(BotInfo.prefix + "random"):
         split_content = message.content.split()
@@ -278,14 +294,8 @@ async def on_message(message):
 
         if len(book_query.result) == 0:
 
-            embed = discord.Embed(title="Nobody here but us chickens!")
-
-            embed.set_image(url=BotInfo.hen_ties[BotInfo.hen_tie_index])
-            BotInfo.hen_tie_index += 1
-            if BotInfo.hen_tie_index == len(BotInfo.hen_ties):
-                BotInfo.hen_tie_index = 0
-                random.shuffle(BotInfo.hen_ties)
-            await message.channel.send(embed=embed)
+            chicken_message = get_chicken_message()
+            await message.channel.send(embed=chicken_message)
             return
 
         page = random.randint(1, book_query.page_amount)
