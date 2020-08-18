@@ -244,8 +244,7 @@ async def on_message(message):
         book_query = Search(query)
         if len(book_query.result) == 0:
             chicken_message = get_chicken_message()
-            await
-            message.channel.send(embed=chicken_message)
+            await message.channel.send(embed=chicken_message)
             return
         else:
             for i in range(amount):
