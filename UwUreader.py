@@ -21,26 +21,26 @@ else:
 
 client = discord.Client()
 
-books = {}
+class BotInfo:
+    books = {}
 
-prefix = "!"
+    prefix = "!"
 
-hen_ties = random.shuffle(
-    [
-        "https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
-        "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
-    ])
+    hen_ties = [
+            "https://cdn.discordapp.com/attachments/739847584545505402/739847622776455249/Hen-tie.jpg",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739850739366494218/Thicken.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739850752629145680/Pain_chicken.jpg",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739850997202944081/Chicken_wander.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851007156027392/Long_boi_chicken.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851258512277575/Trapp.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851609529647154/Hen_tie_2.jpg",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739851610410450954/Motherclucker.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739854897889148989/Nice_cock.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739855614662017024/Black_cock.png",
+            "https://cdn.discordapp.com/attachments/739847584545505402/739860912080420955/Kdc.png",
+        ]
 
-hen_tie_index = 0
+    hen_tie_index = 0
 
 
 class BookInstance:
@@ -66,7 +66,7 @@ class BookInstance:
     @staticmethod
     def get_latest_book_in_channel(channel_id):
         books_in_channel = []
-        for book_id, book in books.items():
+        for book_id, book in BotInfo.books.items():
             if book.message.channel.id == channel_id:
                 books_in_channel.append(book)
 
@@ -89,7 +89,6 @@ async def update_message(msg, instance):
 
 @client.event
 async def on_raw_reaction_add(payload):
-    global books
 
     if client.user.id == payload.user_id:
         return
@@ -102,8 +101,8 @@ async def on_raw_reaction_add(payload):
     if (dt.utcnow() - msg.created_at).total_seconds() < ten_minutes:
         if payload.emoji == discord.PartialEmoji(name="❌"):
             await msg.delete()
-        elif payload.message_id in books and (payload.emoji.id == 736745303650074666 or payload.emoji.id == 736745359614803989):
-            instance = books[payload.message_id]
+        elif payload.message_id in BotInfo.books and (payload.emoji.id == 736745303650074666 or payload.emoji.id == 736745359614803989):
+            instance = BotInfo.books[payload.message_id]
 
             instance.last_interaction = dt.now()
             if payload.emoji.id == 736745303650074666:
@@ -138,7 +137,7 @@ async def on_message(message):
     if message.author.id == client.user.id:
         return
 
-    if message.content.startswith(prefix + 'view'):
+    if message.content.startswith(BotInfo.prefix + 'view'):
         content = message.content.split()
         book_id = int(content[1])
         page = 0
@@ -154,13 +153,13 @@ async def on_message(message):
         else:
             msg = await message.channel.send(embed=create_embed(instance))
             instance.assign_msg(msg)
-            books[msg.id] = instance
+            BotInfo.books[msg.id] = instance
 
             await msg.add_reaction(emoji="<:SixtenFarLeft:736745359614803989>")
             await msg.add_reaction(emoji="<:SixtenFarRight:736745303650074666>")
             await msg.add_reaction(emoji="❌")
 
-    elif message.content.startswith(prefix + "page"):
+    elif message.content.startswith(BotInfo.prefix + "page"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
 
         content = message.content.split()
@@ -172,7 +171,7 @@ async def on_message(message):
 
             await book.update_book(page)
 
-    elif message.content.startswith(prefix + "forward"):
+    elif message.content.startswith(BotInfo.prefix + "forward"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
 
         content = message.content.split()
@@ -186,7 +185,7 @@ async def on_message(message):
 
         await book.update_book(book.page + page_delta)
 
-    elif message.content.startswith(prefix + "back"):
+    elif message.content.startswith(BotInfo.prefix + "back"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
 
         content = message.content.split()
@@ -200,23 +199,23 @@ async def on_message(message):
 
         await book.update_book(book.page - page_delta)
 
-    elif message.content.startswith(prefix + "beginning"):
+    elif message.content.startswith(BotInfo.prefix + "beginning"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
 
         await book.update_book(0)
 
-    elif message.content.startswith(prefix + "end"):
+    elif message.content.startswith(BotInfo.prefix + "end"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
 
         await book.update_book(book.page_count)
 
-    elif message.content.startswith(prefix + "abort"):
+    elif message.content.startswith(BotInfo.prefix + "abort"):
         book = BookInstance.get_latest_book_in_channel(message.channel.id)
 
         await book.msg.delete()
-        del books[book.msg.id]
+        del BotInfo.books[book.msg.id]
 
-    elif message.content.startswith(prefix + "random_image"):
+    elif message.content.startswith(BotInfo.prefix + "random_image"):
         split_content = message.content.split()
         amount = 1
         query = " "
@@ -247,7 +246,7 @@ async def on_message(message):
             msg = await message.channel.send(embed=create_embed(instance))
             await msg.add_reaction(emoji="❌")
 
-    elif message.content.startswith(prefix + "random"):
+    elif message.content.startswith(BotInfo.prefix + "random"):
         split_content = message.content.split()
         if "," in message.content:
             content = " ".join(message.content.split()[1:])
@@ -278,14 +277,14 @@ async def on_message(message):
         book_query = Search(query)
 
         if len(book_query.result) == 0:
-            global hen_tie_index
 
             embed = discord.Embed(title="Nobody here but us chickens!")
-            embed.set_image(url=hen_ties[hen_tie_index])
-            hen_tie_index += 1
-            if hen_tie_index == len(hen_ties):
-                hen_tie_index = 0
-                random.shuffle(hen_ties)
+
+            embed.set_image(url=BotInfo.hen_ties[BotInfo.hen_tie_index])
+            BotInfo.hen_tie_index += 1
+            if BotInfo.hen_tie_index == len(BotInfo.hen_ties):
+                BotInfo.hen_tie_index = 0
+                random.shuffle(BotInfo.hen_ties)
             await message.channel.send(embed=embed)
             return
 
@@ -306,14 +305,14 @@ async def on_message(message):
         else:
             msg = await message.channel.send(embed=create_embed(instance))
             instance.assign_msg(msg)
-            books[msg.id] = instance
+            BotInfo.books[msg.id] = instance
 
             await msg.add_reaction(emoji="<:SixtenFarLeft:736745359614803989>")
             await msg.add_reaction(emoji="<:SixtenFarRight:736745303650074666>")
             await msg.add_reaction(emoji="❌")
 
 
-    elif message.content.startswith(prefix + "help"):
+    elif message.content.startswith(BotInfo.prefix + "help"):
         embed = discord.Embed(title="Commands",
                               description=(f"""**!view <id>**: start reading a doujinshi
                               **!page <page>**: goes to a certain page
@@ -328,7 +327,7 @@ async def on_message(message):
                               """))
         await message.channel.send(embed=embed)
 
-    elif message.author.id == 217704901889884160 and message.content.startswith(prefix + 'clear'):
+    elif message.author.id == 217704901889884160 and message.content.startswith(BotInfo.prefix + 'clear'):
         content = message.content.split(" ")
         limit = 100
         if len(content) > 1:
@@ -343,4 +342,5 @@ async def on_ready():
     print(client.user.id)
     print('------\n\n')
 
+random.shuffle(BotInfo.hen_ties)
 client.run(TOKEN)
